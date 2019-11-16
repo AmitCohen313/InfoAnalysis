@@ -9,16 +9,38 @@ public class Main {
 
         ArrayList<Image> images = CSVReader.readImages();
         ArrayList<condition> conditionArrayList = ConditionGroup.getConditions(Integer.parseInt(args[0]));
+        treeNode initialTree = InitTree(images);
 
 
+    }
+
+    private static treeNode InitTree(ArrayList<Image> imageList) {
+        int label = mostFrequentLabel(imageList);
+        treeNode t = new treeNode(imageList,label);
+        return t;
+    }
+
+    private static int mostFrequentLabel(ArrayList<Image> imageList) {
+        Map<Integer, Integer> hashMap = new HashMap<>();
+        for (Image img : imageList) {
+            hashMap.put(img.getLabel(), hashMap.getOrDefault(img.getLabel(), 0) + 1);
+        }
+        int max_count = 0, result = -1;
+        for (Map.Entry<Integer, Integer> val : hashMap.entrySet()) {
+            if (max_count < val.getValue()) {
+                result = val.getKey();
+                max_count = val.getValue();
+            }
+        }
+        return result;
     }
 
     private void runAlgo(List<treeNode> leaves, int iterationNumber, List<condition> conditionList,
                          List<Image> imageList) {
         for (int i = 0; i < iterationNumber; i++) {
             double maxInfoGain = Integer.MIN_VALUE;
-            treeNode currentBestLeaf = null;
-            treeNode treeForReplace = null;
+            treeNode currentLeafToReplace = null;
+            treeNode treeForReplacement = null;
             for (treeNode leaf : leaves) {
                 for (condition cond : conditionList) {
                     ArrayList<Image> passedCond = new ArrayList<>();
@@ -41,15 +63,38 @@ public class Main {
                     double currentInfoGain = leaf.getEntropy() - relativePassedEntropy - relativeFailedEntropy;
                     if (currentInfoGain > maxInfoGain) {
                         maxInfoGain = currentInfoGain;
-                        currentBestLeaf = leaf;
+                        currentLeafToReplace = leaf;
                         treeNode left = new treeNode(imageList, failedEntropy);
                         treeNode right = new treeNode(imageList, passedEntropy);
-                        treeForReplace = new treeNode(imageList, cond, left, right);
+                        treeForReplacement = new treeNode(imageList, cond, left, right);
                     }
                 }/**********************************************************************************/
             }/*TODO reference problem for currentBestLeaf, change the value inside the leaf!!!!!!!*/
-            currentBestLeaf = treeForReplace;
+            currentLeafToReplace = treeForReplacement;
         }
+    }
+
+    // Creates a list of all the leaves in a given tree.
+    private ArrayList<treeNode> extractLeaves (treeNode tree) {
+        ArrayList<treeNode> leafList = new ArrayList<>();
+        extractLeaves(tree,leafList);
+        return leafList;
+    }
+
+    // This method extracts the leaves from the tree
+    private void extractLeaves (treeNode tree, ArrayList<treeNode> leafList) {
+        if (tree.isLeaf()) {
+            leafList.add(tree);
+        }
+        else {
+            if (tree.getLeft() != null) {
+                extractLeaves(tree.getLeft(), leafList);
+            }
+            if (tree.getRight() != null) {
+                extractLeaves(tree.getRight(), leafList);
+            }
+        }
+
     }
 
     private static int mostFrequent(int[] arr) {
@@ -68,6 +113,7 @@ public class Main {
     }
 
     /*TODO ask sivan about the log base*/
+    // Calc the entropy based on the given function
     private double calcEntropy(int[] frequencies, int totalAmount) {
         double result = 0.0;
         for (int i = 0; i < 10; i++) {

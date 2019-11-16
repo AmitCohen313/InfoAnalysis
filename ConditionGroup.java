@@ -1,9 +1,8 @@
-import jdk.jshell.spi.ExecutionControl;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConditionGroup {/*TODO fix it*/
+public class ConditionGroup {/*TODO complete version 2*/
 
     public static ArrayList<condition> getConditions(int condition_ver) {
         ArrayList<condition> conditionList = new ArrayList<>();

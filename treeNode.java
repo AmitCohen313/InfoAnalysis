@@ -1,17 +1,21 @@
 import java.util.List;
 
 public class treeNode {
-    private boolean isLeaf;
-
 
     private treeNode left;
     private treeNode right;
     private double entropy;
     private int expectedLabel;
-    private int[] frequency;
+    private int[] frequencies;
     private condition condition;
     private List<Image> imageList;
 
+    public treeNode(List<Image> imageList, int expectedLabel) {
+        this.left = null;
+        this.right = null;
+        this.imageList = imageList;
+        this.expectedLabel = expectedLabel;
+    }
     public treeNode(List<Image> imageList, double entropy) {
         this.left = null;
         this.right = null;
@@ -25,7 +29,6 @@ public class treeNode {
         this.left = left;
         this.right = right;
     }
-
 
 
     public boolean isLeaf() {
@@ -58,6 +61,10 @@ public class treeNode {
 
     public List<Image> getImageList() {
         return imageList;
+    }
+
+    public void setExpectedLabel(int label) {
+        this.expectedLabel = label;
     }
 
 }
