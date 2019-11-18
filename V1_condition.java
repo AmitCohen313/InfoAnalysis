@@ -13,11 +13,5 @@ public class V1_condition implements condition {
         this.Y = y;
     }
 
-    public int getX() {
-        return X;
-    }
 
-    public int getY() {
-        return Y;
-    }
 }

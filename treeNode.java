@@ -6,20 +6,15 @@ public class treeNode {
     private treeNode right;
     private double entropy;
     private int expectedLabel;
-    private int[] frequencies;
+    private int[] labelFrequencies;
     private condition condition;
     private List<Image> imageList;
 
-    public treeNode(List<Image> imageList, int expectedLabel) {
+    public treeNode(List<Image> imageList, double entropy , int expectedLabel) {
         this.left = null;
         this.right = null;
         this.imageList = imageList;
         this.expectedLabel = expectedLabel;
-    }
-    public treeNode(List<Image> imageList, double entropy) {
-        this.left = null;
-        this.right = null;
-        this.imageList = imageList;
         this.entropy = entropy;
     }
 
@@ -35,20 +30,8 @@ public class treeNode {
         return left == null && right == null;
     }
 
-    public void setLeft(treeNode left) {
-        this.left = left;
-    }
-
-    public void setRight(treeNode right) {
-        this.right = right;
-    }
-
     public double getEntropy() {
         return entropy;
-    }
-
-    public void setEntropy(double entropy) {
-        this.entropy = entropy;
     }
 
     public treeNode getLeft() {
@@ -63,8 +46,24 @@ public class treeNode {
         return imageList;
     }
 
-    public void setExpectedLabel(int label) {
-        this.expectedLabel = label;
+    public condition getCondition() {
+        return condition;
+    }
+
+    public int getExpectedLabel() {
+        return expectedLabel;
+    }
+
+
+    // TODO: Find better way to do this.
+    public void replaceLeafByTree (treeNode tree) {
+        this.left = tree.left;
+        this.right = tree.right;
+        this.entropy = tree.entropy;
+        this.expectedLabel = tree.expectedLabel;
+        this.labelFrequencies = tree.labelFrequencies;
+        this.condition = tree.condition;
+        this.imageList = tree.imageList;
     }
 
 }
