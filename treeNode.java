@@ -14,8 +14,8 @@ public class treeNode {
         this.left = null;
         this.right = null;
         this.imageList = imageList;
-        this.expectedLabel = expectedLabel;
         this.entropy = entropy;
+        this.expectedLabel = expectedLabel;
     }
 
     public treeNode(List<Image> imageList, condition condition, treeNode left, treeNode right) {

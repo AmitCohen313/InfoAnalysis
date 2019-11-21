@@ -4,13 +4,21 @@ public class Algorithm {
 
     public static void main(String[] args) {
 
-        ArrayList<Image> globalImageList = CSVReader.readImages();
+
+
+        ArrayList<Image> globalImageList = CSVReader.readImages("mnist_train.csv");
+        ArrayList<Image> testSet = CSVReader.readImages("mnist_test.csv");
         ArrayList<condition> conditionList = ConditionGroup.getConditions(Integer.parseInt(args[0]));
-        treeNode tree = executeAlgorithm(13,25,globalImageList,conditionList);
+
+        treeNode tree = generateTree(1000,conditionList,globalImageList);
+
+        //treeNode tree = executeAlgorithm(10,25,globalImageList,conditionList);
 
         double s = applyTreeOnDataSet(tree,globalImageList);
+        double rs = applyTreeOnDataSet(tree,testSet);
 
         System.out.println("score is " + s);
+        System.out.println("score on test set is " + rs);
     }
 
     // The main method of the algorithm. Returns a prediction tree.
@@ -65,15 +73,6 @@ public class Algorithm {
     }
 
 
-//    // Creates a new tree with one leaf. The label of the leaf is the most common label in the data set.
-//    private static virtualTree InitTree(ArrayList<Image> imageList) {
-//        int[] frequencies = calcImageFrequencies(imageList);
-//        int label = Utilities.calcIndexOfBiggestElementInArray(frequencies);
-//        double entropy = Utilities.calcEntropy(frequencies,imageList.size());
-//        treeNode t = new treeNode(imageList,entropy,label);
-//        virtualTree vt = calcChildren(t.);
-//        return t;
-//    }
 
     // Gets image list and returns a frequency array of the images' labels.
     private static int[] calcImageFrequencies(ArrayList<Image> imageList) {
@@ -90,18 +89,17 @@ public class Algorithm {
 
     private static treeNode generateTree(int iterationNumber, List<condition> conditionList, ArrayList<Image> imageList) {
         // Initialize tree.
-        long start = System.currentTimeMillis();
-        PriorityQueue<virtualTree> virtualTreePriorityQueue = new PriorityQueue<>(1,new virtualTreeComperator());
+        PriorityQueue<virtualTree> virtualTreePriorityQueue = new PriorityQueue<>(iterationNumber,new virtualTreeComperator());
         int[] frequencies = calcImageFrequencies(imageList);
-        int label = Utilities.calcIndexOfBiggestElementInArray(frequencies);
+        int label = Utilities.calcIndexOfBiggestElement(frequencies);
         double entropy = Utilities.calcEntropy(frequencies,imageList.size());
         treeNode t = new treeNode(imageList,entropy,label);
         virtualTree vt = calcChildren(t,conditionList);
         virtualTreePriorityQueue.add(vt);
-        long end = System.currentTimeMillis();
 
 
         for (int i = 0; i < iterationNumber; i++) {
+            System.out.println(virtualTreePriorityQueue.size());
             virtualTree virtualTree = virtualTreePriorityQueue.poll();
             treeNode nodeToReplace = virtualTree.pointerToLeaf;
             nodeToReplace.replaceLeafByTree(virtualTree.tripletsTree);
@@ -110,57 +108,15 @@ public class Algorithm {
             virtualTreePriorityQueue.add(leftTree);
             virtualTreePriorityQueue.add(rightTree);
         }
-        int asdfasd = 0;
         return t;
-
-
-
-            // Extract the leaves from the tree.
-            //ArrayList<treeNode> leaves = Utilities.extractLeaves(tree);
-
-//            treeNode currentLeafToReplace = null;
-//            treeNode treeForReplacement = null;
-//            for (treeNode leaf : leaves) {
-//                for (condition cond : conditionList) {
-//                    ArrayList<Image> passedCond = new ArrayList<>();
-//                    ArrayList<Image> failedCond = new ArrayList<>();
-//                    int[] passedFrequencies = new int[10];
-//                    int[] failedFrequencies = new int[10];
-//                    for (Image img : leaf.getImageList()) {
-//                        if (cond.applyCondition(img)) {
-//                            passedCond.add(img);
-//                            passedFrequencies[img.getLabel()]++;
-//                        } else {
-//                            failedCond.add(img);
-//                            failedFrequencies[img.getLabel()]++;
-//                        }
-//                    }
-//                    double passedEntropy = Utilities.calcEntropy(passedFrequencies, passedCond.size());
-//                    double failedEntropy = Utilities.calcEntropy(failedFrequencies, failedCond.size());
-//                    double relativePassedEntropy = passedCond.size() * passedEntropy / leaf.getImageList().size();
-//                    double relativeFailedEntropy = failedCond.size() * failedEntropy / leaf.getImageList().size();
-//                    double currentInfoGain = leaf.getEntropy() - relativePassedEntropy - relativeFailedEntropy;
-//                    double currentWeightedInfoGain = currentInfoGain*leaf.getImageList().size();
-//                    if (currentWeightedInfoGain > maxInfoGain) {
-//                        maxInfoGain = currentWeightedInfoGain;
-//                        currentLeafToReplace = leaf;
-//                        treeNode left = new treeNode(failedCond, failedEntropy,Utilities.calcIndexOfBiggestElementInArray(failedFrequencies));
-//                        treeNode right = new treeNode(passedCond, passedEntropy,Utilities.calcIndexOfBiggestElementInArray(passedFrequencies));
-//                        treeForReplacement = new treeNode(leaf.getImageList(), cond, left, right);
-//                    }
-//                }
-//            }
-//            currentLeafToReplace.replaceLeafByTree(treeForReplacement);
-
-
-        //}
     }
 
 
     public static virtualTree calcChildren(treeNode father, List<condition> conditionList) {
-        double maxInfoGain = Double.MIN_VALUE;
+        double maxInfoGain = -1.0;
         treeNode currentBestTree = father;
         for (condition cond : conditionList) {
+            // Maybe the new takes a lot of time
             ArrayList<Image> passedCond = new ArrayList<>();
             ArrayList<Image> failedCond = new ArrayList<>();
             int[] passedFrequencies = new int[10];
@@ -176,14 +132,14 @@ public class Algorithm {
             }
             double passedEntropy = Utilities.calcEntropy(passedFrequencies, passedCond.size());
             double failedEntropy = Utilities.calcEntropy(failedFrequencies, failedCond.size());
-            double relativePassedEntropy = passedCond.size() * passedEntropy / father.getImageList().size();
-            double relativeFailedEntropy = failedCond.size() * failedEntropy / father.getImageList().size();
+            double relativePassedEntropy = (double)passedCond.size() * passedEntropy / father.getImageList().size();
+            double relativeFailedEntropy = (double)failedCond.size() * failedEntropy / father.getImageList().size();
             double currentInfoGain = father.getEntropy() - relativePassedEntropy - relativeFailedEntropy;
-            double currentWeightedInfoGain = currentInfoGain*father.getImageList().size();
+            double currentWeightedInfoGain = currentInfoGain * father.getImageList().size();
             if (currentWeightedInfoGain > maxInfoGain) {
                 maxInfoGain = currentWeightedInfoGain;
-                treeNode left = new treeNode(failedCond, failedEntropy,Utilities.calcIndexOfBiggestElementInArray(failedFrequencies));
-                treeNode right = new treeNode(passedCond, passedEntropy,Utilities.calcIndexOfBiggestElementInArray(passedFrequencies));
+                treeNode right = new treeNode(passedCond, passedEntropy,Utilities.calcIndexOfBiggestElement(passedFrequencies));
+                treeNode left = new treeNode(failedCond, failedEntropy,Utilities.calcIndexOfBiggestElement(failedFrequencies));
                 currentBestTree = new treeNode(father.getImageList(), cond, left, right);
             }
         }

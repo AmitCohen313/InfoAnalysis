@@ -7,8 +7,8 @@ import java.util.Arrays;
 
 public class CSVReader {
 
-    public static ArrayList<Image> readImages() {
-        String csvFile = "mnist_train.csv";
+    public static ArrayList<Image> readImages(String path) {
+        String csvFile = path;
         String line = "";
         ArrayList<Image> imageList = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {

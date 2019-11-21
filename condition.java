@@ -1,4 +1,4 @@
 public interface condition {
 
-    public boolean applyCondition(Image img);
+    boolean applyCondition(Image img);
 }
