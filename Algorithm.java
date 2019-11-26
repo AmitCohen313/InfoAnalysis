@@ -14,16 +14,16 @@ public class Algorithm {
         System.out.println("Conditions creation took " + (System.currentTimeMillis()-now));
         now = System.currentTimeMillis();
 
-        treeNode tree = newExecuteAlgo(15,20,globalImageList,conditionList);
-        System.out.println("Creating the tree took " + (System.currentTimeMillis()-now));
+        treeNode tree = newExecuteAlgo(13,20,globalImageList,conditionList);
+        System.out.println("Creating the tree took " + (((System.currentTimeMillis()-now))/1000) + "s");
         now = System.currentTimeMillis();
-//        treeNode tree = executeAlgorithm(13,25,globalImageList,conditionList);
 
         double s = applyTreeOnDataSet(tree,globalImageList);
         double rs = applyTreeOnDataSet(tree,testSet);
 
         System.out.println("Running data set on the tree took " + (System.currentTimeMillis()-now));
 
+        System.out.println("Tree size is " + size(tree));
         System.out.println("score is " + s);
         System.out.println("score on test set is " + rs);
     }
