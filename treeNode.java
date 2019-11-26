@@ -11,7 +11,10 @@ public class treeNode {
     private List<Image> imageList;
     private int timeStamp;
 
-    public treeNode(){}
+    public treeNode(){
+        this.left=null;
+        this.right=null;
+    }
 
     public treeNode(List<Image> imageList, double entropy , int expectedLabel) {
         this.left = null;
@@ -19,16 +22,17 @@ public class treeNode {
         this.imageList = imageList;
         this.entropy = entropy;
         this.expectedLabel = expectedLabel;
-        this.timeStamp = -1;
+        this.timeStamp = Integer.MIN_VALUE;
 
     }
 
-    public treeNode(List<Image> imageList, condition condition, treeNode left, treeNode right, int timeStamp) {
+    public treeNode(List<Image> imageList, condition condition, treeNode left, treeNode right, int expectedLabel) {
         this.imageList = imageList;
         this.condition = condition;
         this.left = left;
         this.right = right;
-        this.timeStamp = timeStamp;
+        this.expectedLabel = expectedLabel;
+        this.timeStamp = Integer.MIN_VALUE;
     }
 
 
@@ -72,6 +76,9 @@ public class treeNode {
         return expectedLabel;
     }
 
+    public void setTimeStamp(int timeStamp) {
+        this.timeStamp = timeStamp;
+    }
 
 
     // TODO: Find better way to do this.

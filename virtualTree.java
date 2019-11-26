@@ -3,7 +3,7 @@ public class virtualTree {
     public double informationGain;
     public treeNode pointerToLeaf;
 
-    virtualTree(treeNode tripletsTree, treeNode pointerToLeaf,double informationGain) {
+    public virtualTree(treeNode tripletsTree, treeNode pointerToLeaf,double informationGain) {
         this.tripletsTree = tripletsTree;
         this.informationGain = informationGain;
         this.pointerToLeaf = pointerToLeaf;
