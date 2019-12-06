@@ -7,15 +7,15 @@ public class Algorithm {
         long now = System.currentTimeMillis();
         ArrayList<Image> globalImageList = CSVReader.readImages("mnist_train.csv");
         ArrayList<Image> testSet = CSVReader.readImages("mnist_test.csv");
-        System.out.println("Reading image took " + (System.currentTimeMillis()-now));
+        System.out.println("Reading image took " + ((float)(System.currentTimeMillis()-now)/1000) + " s");
         now = System.currentTimeMillis();
 //        ArrayList<condition> conditionList = ConditionGroup.getConditions(Integer.parseInt(args[0]));
-        ArrayList<condition> conditionList = ConditionGroup.getConditions(1,globalImageList);
-        System.out.println("Conditions creation took " + (System.currentTimeMillis()-now));
+        ArrayList<condition> conditionList = ConditionGroup.getConditions(7,globalImageList);
+        System.out.println("Conditions creation took " + (System.currentTimeMillis()-now) + " ms");
         now = System.currentTimeMillis();
 
-        treeNode tree = newExecuteAlgo(13,20,globalImageList,conditionList);
-        System.out.println("Creating the tree took " + (((System.currentTimeMillis()-now))/1000) + "s");
+        treeNode tree = newExecuteAlgo(11,28,globalImageList,conditionList);
+        System.out.println("Creating the tree took " + ((float)((System.currentTimeMillis()-now))/1000) + "s");
         now = System.currentTimeMillis();
 
         double s = applyTreeOnDataSet(tree,globalImageList);
@@ -50,14 +50,32 @@ public class Algorithm {
         double currentBestScore = -1.0;
         int bestTreeSize = -1;
         for (int i = 1; i <= maxQueueSize; i++) {
+            System.out.print(i + ".");
             virtualTree virtualTree = virtualTreePriorityQueue.poll();
             treeNode nodeToReplace = virtualTree.pointerToLeaf;
             nodeToReplace.replaceLeafByTree(virtualTree.tripletsTree);
             nodeToReplace.setTimeStamp(i);
+
+//            Callable<virtualTree> callableLeftTree = () -> {
+//                virtualTree left = calcChildren(nodeToReplace.getLeft(), conditionList);
+//                return left;
+//            };
+//            Callable<virtualTree> callableRightTree = () -> {
+//                virtualTree right = calcChildren(nodeToReplace.getRight(), conditionList);
+//                return right;
+//            };
+//
+//            ExecutorService e = Executors.newFixedThreadPool(2);
+//            Future<virtualTree> leftTree = e.submit(callableLeftTree);
+//            Future<virtualTree> rightTree = e.submit(callableRightTree);
             virtualTree leftTree = calcChildren(nodeToReplace.getLeft(), conditionList);
             virtualTree rightTree = calcChildren(nodeToReplace.getRight(), conditionList);
-            virtualTreePriorityQueue.add(leftTree);
-            virtualTreePriorityQueue.add(rightTree);
+            try {
+                virtualTreePriorityQueue.add(leftTree);
+                virtualTreePriorityQueue.add(rightTree);
+            } catch (Exception b) {
+
+            }
 
 
             // Check if the current tree is better than the current best tree.
@@ -71,6 +89,7 @@ public class Algorithm {
             }
         }
 
+        System.out.print("\n");
         cleanTree(t, bestTreeSize);
         return t;
 
@@ -150,11 +169,70 @@ public class Algorithm {
         double maxInfoGain = -1.0;
         treeNode currentBestTree = father;
         for (condition cond : conditionList) {
-            // Maybe the new takes a lot of time
+//             Maybe the new takes a lot of time
             ArrayList<Image> passedCond = new ArrayList<>();
             ArrayList<Image> failedCond = new ArrayList<>();
+
+//            List<Image> passedCond = Collections.synchronizedList(new ArrayList<>());
+//            List<Image> failedCond = Collections.synchronizedList(new ArrayList<>());
+
             int[] passedFrequencies = new int[10];
             int[] failedFrequencies = new int[10];
+//
+//            List<Image> images = father.getImageList();
+//            class temp extends Thread {
+//                private Image img;
+//                private boolean passed;
+//                private int label;
+//                public temp(Image img) {
+//                    this.img = img;
+//                    this.label = img.getLabel();
+//                }
+//                public void run() {
+//                    passed = cond.applyCondition(img);
+//                }
+//                public int getLabel(){
+//                    return label;
+//                }
+//                public boolean isPassed() {
+//                    return passed;
+//                }
+//            }
+//
+//            ExecutorService e = Executors.newFixedThreadPool(20);
+//            List<temp> threadlist = new ArrayList<>();
+//            for(Image img : images) {
+//                threadlist.add(new temp(img));
+//            }
+//            int i =0;
+//            ThreadGroup tg = new ThreadGroup("main");
+//            while ( i < threadlist.size()){
+//                if (tg.activeCount() < 24) {
+//                    Thread t = threadlist.get(i);
+//                    t.start();
+//                    i++;
+//                } else {
+//                    try {Thread.sleep(100);} /*wait 0.1 second before checking again*/
+//                    catch (InterruptedException e3) {e3.printStackTrace();}
+//                }
+//            }
+//            while(tg.activeCount()>0)
+//            {
+//                try {Thread.sleep(100);}
+//                catch (InterruptedException e2) {e2.printStackTrace();}
+//            }
+//
+//            for (i=0;i<threadlist.size();i++)
+//            {
+//                temp t = threadlist.get(i);
+//                if (t.isPassed()) {
+//                    passedCond.add(t.img);
+//                    passedFrequencies[t.getLabel()]++;
+//                } else {
+//                    failedCond.add(t.img);
+//                    failedFrequencies[t.getLabel()]++;
+//                }
+//            }
             for (Image img : father.getImageList()) {
                 if (cond.applyCondition(img)) {
                     passedCond.add(img);

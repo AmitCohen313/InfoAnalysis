@@ -11,8 +11,8 @@ public class CSVReader {
         String csvFile = path;
         String line = "";
         ArrayList<Image> imageList = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
 
+        try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
             while ((line = br.readLine()) != null) {
 
                 int[] imageArr = Arrays.stream(line.split(",")).mapToInt(Integer::parseInt).toArray();
@@ -25,7 +25,6 @@ public class CSVReader {
 
 
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }

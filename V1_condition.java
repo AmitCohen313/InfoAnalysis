@@ -1,3 +1,4 @@
+
 public class V1_condition implements condition {
     private int X;
     private int Y;
