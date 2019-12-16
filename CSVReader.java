@@ -2,33 +2,43 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.StringTokenizer;
 
 
 public class CSVReader {
 
     public static ArrayList<Image> readImages(String path) {
-        String csvFile = path;
-        String line = "";
+        String line;
         ArrayList<Image> imageList = new ArrayList<>();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             while ((line = br.readLine()) != null) {
-
-                int[] imageArr = Arrays.stream(line.split(",")).mapToInt(Integer::parseInt).toArray();
-                ArrayList<Integer> ImageList = new ArrayList<>(imageArr.length - 1);
-                for (int i = 1; i < imageArr.length; i++) {
-                    ImageList.add(imageArr[i]);
-                }
-                Image im = new Image(imageArr[0], ImageList);
-                imageList.add(im);
-
-
+                Pair<Integer,ArrayList<Integer>> res = split(line);
+                imageList.add(new Image(res.first,res.second));
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
         return imageList;
+    }
+
+    public static Pair<Integer,ArrayList<Integer>> split(final String line) {
+        StringTokenizer st = new StringTokenizer(line,",");
+        ArrayList<Integer> pixelsArr = new ArrayList<>();
+        Integer label = Integer.parseInt((String)st.nextElement());
+
+        while (st.hasMoreElements()) {
+            pixelsArr.add(Integer.parseInt((String)st.nextElement()));
+        }
+        return new Pair<>(label,pixelsArr);
+    }
+    private static class Pair<T1,T2> {
+        protected T1 first;
+        protected T2 second;
+        protected Pair(T1 t1, T2 t2) {
+            first = t1;
+            second = t2;
+        }
     }
 
 }
