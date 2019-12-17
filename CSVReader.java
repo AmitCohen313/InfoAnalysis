@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
-
 public class CSVReader {
 
     public static ArrayList<Image> readImages(String path) {
@@ -13,8 +12,8 @@ public class CSVReader {
 
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             while ((line = br.readLine()) != null) {
-                Pair<Integer,ArrayList<Integer>> res = split(line);
-                imageList.add(new Image(res.first,res.second));
+                Utilities.Triplet<Integer,Integer[],Integer[]> res = split(line);
+                imageList.add(new Image(res.first,res.second,res.third));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -22,23 +21,35 @@ public class CSVReader {
         return imageList;
     }
 
-    public static Pair<Integer,ArrayList<Integer>> split(final String line) {
+    public static Utilities.Triplet<Integer,Integer[],Integer[]> split(final String line) {
         StringTokenizer st = new StringTokenizer(line,",");
-        ArrayList<Integer> pixelsArr = new ArrayList<>();
+        Integer[] pixelsArr = new Integer[784];
+        Integer[] integralPixelsArr = new Integer[784];
         Integer label = Integer.parseInt((String)st.nextElement());
-
+        int i = 0;
+        int j = 0;
         while (st.hasMoreElements()) {
-            pixelsArr.add(Integer.parseInt((String)st.nextElement()));
+            pixelsArr[Utilities.calcIndices(i,j)] = (Integer.parseInt((String)st.nextElement()));
+
+            // Create the integral array with dynamic programming.
+            if (i == 0 && j == 0){
+                integralPixelsArr[Utilities.calcIndices(i,j)] = pixelsArr[Utilities.calcIndices(i,j)];
+            } else if (i == 0){
+                integralPixelsArr[Utilities.calcIndices(i,j)] = integralPixelsArr[Utilities.calcIndices(i,j-1)] + pixelsArr[Utilities.calcIndices(i,j)];
+            } else if (j==0){
+                integralPixelsArr[Utilities.calcIndices(i,j)] = integralPixelsArr[Utilities.calcIndices(i-1,j)] + pixelsArr[Utilities.calcIndices(i,j)];
+            } else {
+                integralPixelsArr[Utilities.calcIndices(i,j)] = integralPixelsArr[Utilities.calcIndices(i-1,j)] + integralPixelsArr[Utilities.calcIndices(i,j-1)] - integralPixelsArr[Utilities.calcIndices(i-1,j-1)] + pixelsArr[Utilities.calcIndices(i,j)];
+            }
+
+            if (i == 27){
+                i = 0;
+                j++;
+            } else{
+                i++;
+            }
         }
-        return new Pair<>(label,pixelsArr);
-    }
-    private static class Pair<T1,T2> {
-        protected T1 first;
-        protected T2 second;
-        protected Pair(T1 t1, T2 t2) {
-            first = t1;
-            second = t2;
-        }
+        return new Utilities.Triplet<>(label,pixelsArr,integralPixelsArr);
     }
 
 }

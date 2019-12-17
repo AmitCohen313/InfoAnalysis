@@ -6,7 +6,7 @@ public class V1_condition implements condition {
 
     @Override
     public boolean applyCondition(Image img) {
-        return img.getPixels().get(28 * Y + X) > 128;
+        return img.getPixelAt(X,Y) > 128;
     }
 
     public V1_condition(int x, int y) {

@@ -1,14 +1,14 @@
 public class V4_condition implements condition {
     private int X;
     private int Y;
-    private int threshold;
+    private double threshold;
 
     @Override
     public boolean applyCondition(Image img) {
-        return img.getPixels().get(28 * Y + X) > threshold;
+        return img.getPixelAt(X,Y) > threshold;
     }
 
-    public V4_condition(int x, int y, int threshold) {
+    public V4_condition(int x, int y, double threshold) {
         this.X = x;
         this.Y = y;
         this.threshold = threshold;

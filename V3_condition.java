@@ -14,16 +14,15 @@ public class V3_condition implements condition {
     }
 
     public boolean applyCondition(Image img) {
-        ArrayList<Integer> pixels = img.getPixels();
-        return calcRec(pixels,X,Y)>threshold;
+        return calcRec(img,X,Y)>threshold;
 
     }
 
-    private double calcRec(ArrayList<Integer> pixels, int x, int y) {
+    private double calcRec(Image img, int x, int y) {
         double sum = 0.0;
         for (int i = 0; i <= x ; i++){
             for(int j = 0; j <= y; j++) {
-                sum += pixels.get(28 * j + i);
+                sum += img.getPixelAt(i,j);
             }
         }
         return sum / ((x+1)*(y+1));

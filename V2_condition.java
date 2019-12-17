@@ -25,17 +25,16 @@ public class V2_condition implements condition {
     }
 
     public boolean applyCondition(Image img) {
-        ArrayList<Integer> pixels = img.getPixels();
-        return calcSquare(pixels,X,Y) > threshold;
+        return calcSquare(img,X,Y) > threshold;
 
     }
 
-    private double calcSquare(ArrayList<Integer> pixels, int X, int Y) {
+    private double calcSquare(Image img, int X, int Y) {
         int squareRadius = (squareSize-1)/2;
         double sum = 0.0;
         for (int i = X-squareRadius; i<= X+squareRadius; i++) {
             for (int j = Y-squareRadius; j<= Y+squareRadius; j++) {
-                sum += pixels.get(28 * j + i);
+                sum += img.getPixelAt(i,j);
             }
         }
         return sum / (squareSize * squareSize);

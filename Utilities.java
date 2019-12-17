@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
 import java.util.Random;
 
 public class Utilities {
@@ -45,4 +47,43 @@ public class Utilities {
         }
         return result;
     }
+
+    public static int calcIndices(int x, int y){
+        return 28*y+x;
+    }
+
+    public static class Triplet<T1,T2,T3> {
+        public T1 first;
+        public T2 second;
+        public T3 third;
+        public Triplet(T1 t1, T2 t2, T3 t3) {
+            first = t1;
+            second = t2;
+            third = t3;
+        }
+    }
+
+    public static class Pair<T1,T2> {
+        public T1 first;
+        public T2 second;
+        public Pair(T1 t1, T2 t2) {
+            first = t1;
+            second = t2;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Pair<?, ?> pair = (Pair<?, ?>) o;
+            return Objects.equals(first, pair.first) &&
+                    Objects.equals(second, pair.second);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(first, second);
+        }
+    }
+
 }

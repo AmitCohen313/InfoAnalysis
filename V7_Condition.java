@@ -11,7 +11,7 @@ public class V7_Condition implements condition {
     }
 
     public boolean applyCondition(Image img) {
-        return img.getPixels().get(28 * Y + X) > threshold;
+        return img.getPixelAt(X,Y) > threshold;
 
     }
 

@@ -7,7 +7,7 @@ public class V5_Condition implements condition {
     public boolean applyCondition(Image img) {
         int numOfHits = 0;
         for (int i = 0; i < 28; i++){
-            if (img.getPixels().get(28 * Y + i) > threshold) {
+            if (img.getPixelAt(i,Y) > threshold) {
                 numOfHits++;
             }
         }

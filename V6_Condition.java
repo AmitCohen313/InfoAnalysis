@@ -7,7 +7,7 @@ public class V6_Condition implements condition {
     public boolean applyCondition(Image img) {
         int numOfHits = 0;
         for (int i = 0; i < 28; i++){
-            if (img.getPixels().get(28 * i + X) > threshold) {
+            if (img.getPixelAt(X,i) > threshold) {
                 numOfHits++;
             }
         }

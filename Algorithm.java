@@ -5,16 +5,19 @@ public class Algorithm {
     public static void main(String[] args) {
 
         long now = System.currentTimeMillis();
-        ArrayList<Image> globalImageList = CSVReader.readImages("mnist_train.csv");
-        ArrayList<Image> testSet = CSVReader.readImages("mnist_test.csv");
+        ArrayList<Image> globalImageList = CSVReader.readImages("deskewed_mnist_train.csv");
+        ArrayList<Image> testSet = CSVReader.readImages("deskewed_mnist_test.csv");
         System.out.println("Reading image took " + ((float)(System.currentTimeMillis()-now)/1000) + " s");
         now = System.currentTimeMillis();
 //        ArrayList<condition> conditionList = ConditionGroup.getConditions(Integer.parseInt(args[0]));
         ArrayList<condition> conditionList = ConditionGroup.getConditions(7,globalImageList);
+        //TODO: maybe remove newConditionList
+        ArrayList<condition> newConditionList = Utilities.getRandomElements(conditionList,1000);
+
         System.out.println("Conditions creation took " + (System.currentTimeMillis()-now) + " ms");
         now = System.currentTimeMillis();
 
-        treeNode tree = newExecuteAlgo(11,28,globalImageList,conditionList);
+        treeNode tree = newExecuteAlgo(11,35,globalImageList,newConditionList);
         System.out.println("Creating the tree took " + ((float)((System.currentTimeMillis()-now))/1000) + "s");
         now = System.currentTimeMillis();
 
@@ -70,12 +73,12 @@ public class Algorithm {
 //            Future<virtualTree> rightTree = e.submit(callableRightTree);
             virtualTree leftTree = calcChildren(nodeToReplace.getLeft(), conditionList);
             virtualTree rightTree = calcChildren(nodeToReplace.getRight(), conditionList);
-            try {
-                virtualTreePriorityQueue.add(leftTree);
-                virtualTreePriorityQueue.add(rightTree);
-            } catch (Exception b) {
-
-            }
+//            try {
+            virtualTreePriorityQueue.add(leftTree);
+            virtualTreePriorityQueue.add(rightTree);
+//            } catch (Exception b) {
+//
+//            }
 
 
             // Check if the current tree is better than the current best tree.
@@ -170,8 +173,8 @@ public class Algorithm {
         treeNode currentBestTree = father;
         for (condition cond : conditionList) {
 //             Maybe the new takes a lot of time
-            ArrayList<Image> passedCond = new ArrayList<>();
-            ArrayList<Image> failedCond = new ArrayList<>();
+            ArrayList<Image> passedCond = new ArrayList<>(father.getImageList().size()/2);
+            ArrayList<Image> failedCond = new ArrayList<>(father.getImageList().size()/2);
 
 //            List<Image> passedCond = Collections.synchronizedList(new ArrayList<>());
 //            List<Image> failedCond = Collections.synchronizedList(new ArrayList<>());
