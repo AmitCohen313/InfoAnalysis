@@ -1,9 +1,9 @@
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
 import java.util.Random;
 
 public class Utilities {
+
+
     // Returns a random sublist of the the given list (Those elements are removed from the original list).
     public static <T> ArrayList<T> getRandomElements(ArrayList<T> list, int numberOfElements)
     {
@@ -24,7 +24,7 @@ public class Utilities {
         return newList;
     }
 
-    public static int calcIndexOfBiggestElement(int[] arr) {
+    public static int getIndexOfBiggestElement(int[] arr) {
         int max = 0;
         for (int i = 1; i < arr.length ; i++) {
             if (arr[i] > arr[max]) {
@@ -70,20 +70,7 @@ public class Utilities {
             first = t1;
             second = t2;
         }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Pair<?, ?> pair = (Pair<?, ?>) o;
-            return Objects.equals(first, pair.first) &&
-                    Objects.equals(second, pair.second);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(first, second);
-        }
     }
+
 
 }

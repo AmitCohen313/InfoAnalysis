@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 public class treeNode {
@@ -8,15 +9,27 @@ public class treeNode {
     private int expectedLabel;
     private int[] labelFrequencies;
     private condition condition;
-    private List<Image> imageList;
+    private ArrayList<Image> imageList;
     private int timeStamp;
+    private int startIndex;
+    private int endIndex;
 
     public treeNode(){
         this.left=null;
         this.right=null;
     }
 
-    public treeNode(List<Image> imageList, double entropy , int expectedLabel) {
+    public treeNode(int startIndex, int endIndex, double entropy , int expectedLabel) {
+        this.left = null;
+        this.right = null;
+        this.startIndex = startIndex;
+        this.endIndex = endIndex;
+        this.entropy = entropy;
+        this.expectedLabel = expectedLabel;
+        this.timeStamp = Integer.MIN_VALUE;
+    }
+
+    public treeNode(ArrayList<Image> imageList, double entropy , int expectedLabel) {
         this.left = null;
         this.right = null;
         this.imageList = imageList;
@@ -26,7 +39,18 @@ public class treeNode {
 
     }
 
-    public treeNode(List<Image> imageList, condition condition, treeNode left, treeNode right, int expectedLabel) {
+
+    public treeNode(int startIndex, int endIndex, condition condition, treeNode left, treeNode right, int expectedLabel) {
+        this.startIndex = startIndex;
+        this.endIndex = endIndex;
+        this.condition = condition;
+        this.left = left;
+        this.right = right;
+        this.expectedLabel = expectedLabel;
+        this.timeStamp = Integer.MIN_VALUE;
+    }
+
+    public treeNode(ArrayList<Image> imageList, condition condition, treeNode left, treeNode right, int expectedLabel) {
         this.imageList = imageList;
         this.condition = condition;
         this.left = left;
@@ -64,7 +88,15 @@ public class treeNode {
         return right;
     }
 
-    public List<Image> getImageList() {
+    public int getStartIndex(){
+        return startIndex;
+    }
+
+    public int getEndIndex() {
+        return endIndex;
+    }
+
+    public ArrayList<Image> getImageList() {
         return imageList;
     }
 
@@ -86,10 +118,12 @@ public class treeNode {
         this.left = tree.left;
         this.right = tree.right;
         this.entropy = tree.entropy;
+        this.imageList = tree.imageList;
         this.expectedLabel = tree.expectedLabel;
         this.labelFrequencies = tree.labelFrequencies;
         this.condition = tree.condition;
-        this.imageList = tree.imageList;
+        this.startIndex = tree.startIndex;
+        this.endIndex = tree.endIndex;
         this.timeStamp = tree.timeStamp;
     }
 
