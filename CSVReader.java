@@ -12,7 +12,7 @@ public class CSVReader {
 
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             while ((line = br.readLine()) != null) {
-                Utilities.Triplet<Integer,Integer[],Integer[]> res = split(line);
+                Utilities.Triplet<Integer,Integer[],Integer[]> res = createImage(line);
                 imageList.add(new Image(res.first,res.second,res.third));
             }
         } catch (IOException e) {
@@ -21,7 +21,7 @@ public class CSVReader {
         return imageList;
     }
 
-    public static Utilities.Triplet<Integer,Integer[],Integer[]> split(final String line) {
+    public static Utilities.Triplet<Integer,Integer[],Integer[]> createImage(final String line) {
         StringTokenizer st = new StringTokenizer(line,",");
         Integer[] pixelsArr = new Integer[784];
         Integer[] integralPixelsArr = new Integer[784];
@@ -45,7 +45,7 @@ public class CSVReader {
             if (i == 27){
                 i = 0;
                 j++;
-            } else{
+            } else {
                 i++;
             }
         }

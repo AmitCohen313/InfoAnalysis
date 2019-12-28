@@ -4,6 +4,7 @@ public class V11_Condition implements condition {
     private int x2;
     private int y2;
     private int threshold;
+    private final int condVer = 11;
     @Override
     public boolean applyCondition(Image img) {
         return (img.getIntegralPixelAt(x1,y1) + img.getIntegralPixelAt(x2,y2) - img.getIntegralPixelAt(x1,y2) - img.getIntegralPixelAt(x2,y1))/((x1-x2)*(y1-y2)) > threshold;
@@ -14,5 +15,13 @@ public class V11_Condition implements condition {
         this.x2 = x2;
         this.y2 = y2;
         this.threshold=threshold;
+    }
+
+    public String toString(){
+        return condVer+"!"+x1+"!"+y1+"!"+x2+"!"+y2+"!"+threshold;
+    }
+
+    public static condition fromString(String[] cond){
+        return new V11_Condition(Integer.parseInt(cond[0]),Integer.parseInt(cond[1]),Integer.parseInt(cond[2]),Integer.parseInt(cond[3]),Integer.parseInt(cond[4]));
     }
 }

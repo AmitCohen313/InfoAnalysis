@@ -1,35 +1,30 @@
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 public class treeNode {
 
-    private treeNode left;
-    private treeNode right;
+    public treeNode left;
+    public treeNode right;
     private double entropy;
     private int expectedLabel;
     private int[] labelFrequencies;
-    private condition condition;
-    private ArrayList<Image> imageList;
+    public condition condition;
+    public List<Image> imageList;
     private int timeStamp;
-    private int startIndex;
-    private int endIndex;
 
     public treeNode(){
         this.left=null;
         this.right=null;
     }
 
-    public treeNode(int startIndex, int endIndex, double entropy , int expectedLabel) {
-        this.left = null;
-        this.right = null;
-        this.startIndex = startIndex;
-        this.endIndex = endIndex;
-        this.entropy = entropy;
+    public treeNode(condition cond, int expectedLabel){
+        this.condition = cond;
         this.expectedLabel = expectedLabel;
-        this.timeStamp = Integer.MIN_VALUE;
     }
 
-    public treeNode(ArrayList<Image> imageList, double entropy , int expectedLabel) {
+    public treeNode(List<Image> imageList, double entropy , int expectedLabel) {
         this.left = null;
         this.right = null;
         this.imageList = imageList;
@@ -40,17 +35,7 @@ public class treeNode {
     }
 
 
-    public treeNode(int startIndex, int endIndex, condition condition, treeNode left, treeNode right, int expectedLabel) {
-        this.startIndex = startIndex;
-        this.endIndex = endIndex;
-        this.condition = condition;
-        this.left = left;
-        this.right = right;
-        this.expectedLabel = expectedLabel;
-        this.timeStamp = Integer.MIN_VALUE;
-    }
-
-    public treeNode(ArrayList<Image> imageList, condition condition, treeNode left, treeNode right, int expectedLabel) {
+    public treeNode(List<Image> imageList, condition condition, treeNode left, treeNode right, int expectedLabel) {
         this.imageList = imageList;
         this.condition = condition;
         this.left = left;
@@ -88,17 +73,6 @@ public class treeNode {
         return right;
     }
 
-    public int getStartIndex(){
-        return startIndex;
-    }
-
-    public int getEndIndex() {
-        return endIndex;
-    }
-
-    public ArrayList<Image> getImageList() {
-        return imageList;
-    }
 
     public condition getCondition() {
         return condition;
@@ -112,6 +86,30 @@ public class treeNode {
         this.timeStamp = timeStamp;
     }
 
+    // Encodes a tree to a single string.
+    public String toString() {
+        ArrayList<String> list = new ArrayList<>();
+        LinkedList<treeNode> q = new LinkedList<>();
+        q.offer(this);
+
+        while (!q.isEmpty()) {
+            treeNode h = q.poll();
+            if (h == null) {
+                list.add("#");
+            } else {
+                if (h.condition!= null) {
+                    list.add("C!" + h.condition.toString() +"!" + h.expectedLabel);
+                } else{
+                    list.add("L!" + h.expectedLabel);
+                }
+                q.offer(h.left);
+                q.offer(h.right);
+            }
+        }
+
+        return String.join(",", list);
+    }
+
 
     // TODO: Find better way to do this.
     public void replaceLeafByTree (treeNode tree) {
@@ -122,8 +120,6 @@ public class treeNode {
         this.expectedLabel = tree.expectedLabel;
         this.labelFrequencies = tree.labelFrequencies;
         this.condition = tree.condition;
-        this.startIndex = tree.startIndex;
-        this.endIndex = tree.endIndex;
         this.timeStamp = tree.timeStamp;
     }
 

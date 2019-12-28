@@ -1,24 +1,20 @@
-import java.util.ArrayList;
-import java.util.Random;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Stream;
 
 public class Utilities {
 
-
     // Returns a random sublist of the the given list (Those elements are removed from the original list).
-    public static <T> ArrayList<T> getRandomElements(ArrayList<T> list, int numberOfElements)
-    {
+    public static <T> ArrayList<T> getRandomElements(ArrayList<T> list, int numberOfElements) {
         Random rand = new Random();
         ArrayList<T> newList = new ArrayList<>();
         for (int i = 0; i < numberOfElements; i++) {
-
-            // take a random index between 0 to size
-            // of given List
             int randomIndex = rand.nextInt(list.size());
-
-            // add element in temporary list
             newList.add(list.get(randomIndex));
-
-            // Remove selected element from original list
             list.remove(randomIndex);
         }
         return newList;
@@ -34,8 +30,6 @@ public class Utilities {
         return max;
     }
 
-    /*TODO ask sivan about the log base*/
-    // Calc the entropy based on the given function
     public static double calcEntropy(int[] frequencies, int totalAmount) {
         double result = 0.0;
         if (totalAmount != 0) {
@@ -72,5 +66,98 @@ public class Utilities {
         }
     }
 
+    public static void writeTreeToFile(treeNode tree, String filepath) {
+        try (PrintWriter out = new PrintWriter(filepath)) {
+            out.print(tree.toString());
+        } catch (Exception e) {
+            System.out.println("IOException is caught");
+            e.printStackTrace();
+        }
+    }
+
+    public static treeNode readTreeFromFile(String path) {
+        String data = readLineByLine(path);
+        String[] arr = data.split(",");
+        if (arr[0].equals("#")) {
+            return null;
+        }
+
+        treeNode root = stringToNode(arr[0]);
+        LinkedList<treeNode> q = new LinkedList<>();
+        q.offer(root);
+
+        int i = 1;
+
+        while (!q.isEmpty()) {
+            treeNode h = q.poll();
+            if (h != null) {
+                treeNode left = null;
+                if (!arr[i].contains("#")) {
+                    left = stringToNode(arr[i]);
+                }
+                h.left = left;
+                q.offer(left);
+                i++;
+
+                treeNode right = null;
+                if (!arr[i].contains("#")) {
+                    right = stringToNode(arr[i]);
+                }
+                h.right = right;
+                q.offer(right);
+                i++;
+            }
+        }
+        return root;
+    }
+
+
+
+    public static treeNode stringToNode(String nodeString) {
+        String[] node = nodeString.split("!");
+        condition cond = null;
+        if (node[0].equals("C")) {
+//            switch (node[1]) {
+//                case "1":
+//                    cond = V1_condition.fromString(Arrays.copyOfRange(node, 2, node.length));
+//                    break;
+//                case "4":
+//                    cond = V4_condition.fromString(Arrays.copyOfRange(node, 2, node.length));
+//                    break;
+//                case "9":
+//                    cond = V9_Condition.fromString(Arrays.copyOfRange(node, 2, node.length));
+//                    break;
+//                case "11":
+//                    cond = V11_Condition.fromString(Arrays.copyOfRange(node, 2, node.length));
+//                    break;
+//            }
+            dictionary.get(node[1]);
+        }
+        int label = Integer.parseInt(node[node.length-1]);
+        return new treeNode(cond,label);
+    }
+
+    private static HashMap<String,Object> dictionary = new HashMap<String,Object>(){
+        {
+            put("1",V1_condition.class);
+            put("4",V4_condition.class);
+            put("9",V9_Condition.class);
+            put("11",V11_Condition.class);
+        }
+    };
+
+    public static String readLineByLine(String filePath)
+    {
+        StringBuilder contentBuilder = new StringBuilder();
+        try (Stream<String> stream = Files.lines( Paths.get(filePath), StandardCharsets.UTF_8))
+        {
+            stream.forEach(s -> contentBuilder.append(s).append("\n"));
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        return contentBuilder.toString();
+    }
 
 }
