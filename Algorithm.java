@@ -1,4 +1,3 @@
-import java.io.PrintWriter;
 import java.util.*;
 import java.util.concurrent.*;
 import java.time.format.DateTimeFormatter;
@@ -8,54 +7,17 @@ public class Algorithm {
     public static void main(String[] args) {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM_dd_HH_mm_ss");
         LocalDateTime now = LocalDateTime.now();
-        int numOfRepeats = 10;
         int conditionVer = 2;
-        try (PrintWriter out = new PrintWriter("confMatrix" + "_R" + numOfRepeats  + "_V" + conditionVer + "_T"+ dtf.format(now) + ".txt")) {
-            out.println("Results are:");
-            //////////////// Confusion matrix section //////////
-            out.println("Learn with mnist and predict mnist:");
-            learn(13, 40, conditionVer, "tree.txt", "deskewed_mnist_train.csv",60000);
-            predictWithConfusionMatrix("tree.txt", "deskewed_mnist_test.csv", out);
-            out.println("Done first");
-            out.println("Learn with kannada and predict with kannada:");
-            learn(13, 40, conditionVer, "tree.txt", "deskewed_kannada_mnist_train.csv",60000);
-            predictWithConfusionMatrix("tree.txt", "deskewed_kannada_mnist_test.csv", out);
-            out.println("Done!");
-            ////////////////////////////////////////////////////
+        String trainSetPath = "deskewed_mnist_train.csv";
+        String testSetPath = "deskewed_mnist_test.csv";
 
-//            int i = 50;
-//
-//            while (i<=60000) {
-//                double sum = 0.0;
-//                out.println("Sample size is " + i);
-//                for (int k = 1; k<= numOfRepeats; k++) {
-//                    learn(13, 40, conditionVer, "tree.txt", "deskewed_kannada_mnist_train.csv",i);
-//                    sum += predict("tree.txt", "deskewed_kannada_mnist_test.csv", out);
-//                }
-//                out.println("Average result is "+ sum/numOfRepeats);
-//                out.println("\n\n");
-//                if (i < 200) {
-//                    i += 50;
-//                }
-//                else if (i < 1000) {
-//                    i += 200;
-//                } else if (i < 10000) {
-//                    i+=1000;
-//                } else if (i < 60000) {
-//                    i+=5000;
-//                } else {
-//                    i++;
-//                }
-//            }
-        } catch (Exception e) {
-            System.out.println("IOException is caught");
-            e.printStackTrace();
-        }
-
-
+        learn(13, 40, conditionVer, "tree.txt", trainSetPath);
+        predict("tree.txt", testSetPath);
+        ////////////////////////////////////////////////////
     }
 
-    public static void learn(int L, int P, int conditionVer, String outputFileName, String trainSetPath, int sampleSizeLimitForGraph) {
+
+    public static void learn(int L, int P, int conditionVer, String outputFileName, String trainSetPath) {
         long now = System.currentTimeMillis();
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
@@ -64,14 +26,12 @@ public class Algorithm {
         ArrayList<condition> conditionList = ConditionFactory.createConditions(conditionVer);
         System.out.println("There are " + conditionList.size() + " conditions.");
         ArrayList<Image> trainImageList = CSVReader.readImages(trainSetPath);
-        // TODO: remove after graph is created and use trainImageList instead.
-        ArrayList<Image> imageListForGraph = Utilities.getRandomElements(trainImageList,sampleSizeLimitForGraph);
         System.out.println("Reading images took " + ((float)(System.currentTimeMillis()-now)/1000) + " s");
         ///////////////////////////////////////////////////
 
         ////////////// Tree creating //////////////////////
-        Future<Integer> learnWithHoldoutSetFuture = executorService.submit(() -> learnBestTreeSize(L,P,imageListForGraph,conditionList));
-        Future<treeNode> learnFuture = executorService.submit(() -> (treeNode)createTree((int)Math.pow(2,L),imageListForGraph,null,conditionList));
+        Future<Integer> learnWithHoldoutSetFuture = executorService.submit(() -> learnBestTreeSize(L,P,trainImageList,conditionList));
+        Future<treeNode> learnFuture = executorService.submit(() -> (treeNode)createTree((int)Math.pow(2,L),trainImageList,null,conditionList));
         treeNode tree;
         try {
             Integer bestTreeSize = learnWithHoldoutSetFuture.get();
@@ -89,47 +49,18 @@ public class Algorithm {
         System.out.println("Learning took " + ((float)((System.currentTimeMillis()-now))/1000) + "s");
 
         System.out.println("num: " + trainImageList.size());
-        System.out.println("error: " + (int)(100-(applyTreeOnDataSet(tree,imageListForGraph)*100)));
+        System.out.println("error: " + (int)(100-(applyTreeOnDataSet(tree,trainImageList)*100)));
         System.out.println("size: " + (Utilities.size(tree)-1)/2);
     }
 
 
-
-    public static double predict(String treeFilePath,String testSetPath,PrintWriter out) {
+    public static void predict(String treeFilePath,String testSetPath) {
         treeNode treeTest = Utilities.readTreeFromFile(treeFilePath);
         ArrayList<Image> testSet = CSVReader.readImages(testSetPath);
-        out.println("Tree size is " + (Utilities.size(treeTest)-1)/2);
-        double ret = applyTreeOnDataSet(treeTest,testSet);
-        out.println("Score on test set is " + applyTreeOnDataSet(treeTest,testSet));
-        System.out.println("Done iteration");
-        // TODO: remove return and change to void.
+        System.out.println("test error: " + applyTreeOnDataSet(treeTest,testSet));
         // TODO: add print of all the predicted labels.
-        return ret;
     }
 
-    public static double predictWithConfusionMatrix(String treeFilePath,String testSetPath,PrintWriter out) {
-        Integer[][] confMatxrix = new Integer[10][10];
-        for (int i = 0; i<10; i++){
-            for (int j = 0; j<10; j++) {
-                confMatxrix[i][j] = 0;
-            }
-        }
-        treeNode treeTest = Utilities.readTreeFromFile(treeFilePath);
-        ArrayList<Image> testSet = CSVReader.readImages(testSetPath);
-        out.println("Tree size is " + (Utilities.size(treeTest)-1)/2);
-        double ret = applyTreeOnDataSetWithConfusionMatrix(treeTest,testSet,confMatxrix);
-        out.println("Score on test set is " + ret);
-        for (int i = 0; i<10; i++){
-            for (int j = 0; j<10; j++) {
-                out.print(confMatxrix[i][j] + " ");
-            }
-            out.print('\n');
-        }
-        System.out.println("Done iteration");
-        // TODO: remove return and change to void.
-        // TODO: add print of all the predicted labels.
-        return ret;
-    }
 
     public static Integer learnBestTreeSize(int L, double P, ArrayList<Image> globalImageList, ArrayList<condition> conditionList) {
         // Divide the image set to training and validation set.
@@ -234,17 +165,6 @@ public class Algorithm {
         return (double)(numOfSuccesses)/dataSet.size();
     }
 
-    // Gets a data set and a tree, applies the tree on the data set and returns the success percentage.
-    public static double applyTreeOnDataSetWithConfusionMatrix(treeNode tree, ArrayList<Image> dataSet, Integer[][] confMatrix) {
-        int numOfSuccesses = 0;
-        for (Image img: dataSet) {
-            if (applyTreeOnImageWithConfusionMatrix(tree,img,confMatrix)) {
-                numOfSuccesses++;
-            }
-        }
-        return (double)(numOfSuccesses)/dataSet.size();
-    }
-
 
     // Gets a tree and an image, applies the tree on the image and returns whether the prediction is right or not.
     public static boolean applyTreeOnImage(treeNode tree, Image img) {
@@ -259,22 +179,6 @@ public class Algorithm {
                 }
             }
         }
-        return tree.getExpectedLabel() == img.getLabel();
-    }
-
-    public static boolean applyTreeOnImageWithConfusionMatrix(treeNode tree, Image img, Integer[][] confMatrix) {
-        while (!tree.isLeaf()) {
-            if (tree.getCondition().applyCondition(img)) {
-                if (tree.getRight() != null) {
-                    tree = tree.getRight();
-                }
-            } else {
-                if (tree.getLeft() != null) {
-                    tree = tree.getLeft();
-                }
-            }
-        }
-        confMatrix[img.getLabel()][tree.getExpectedLabel()]++;
         return tree.getExpectedLabel() == img.getLabel();
     }
 
