@@ -1,5 +1,3 @@
-import java.util.ArrayList;
-
 public class Image {
     private int label;
     private Integer[] pixels;
@@ -22,5 +20,4 @@ public class Image {
     public Integer getIntegralPixelAt(int x, int y) {
         return integralPixels[Utilities.calcIndices(x,y)];
     }
-
 }

@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -9,15 +8,9 @@ public class treeNode {
     public treeNode right;
     private double entropy;
     private int expectedLabel;
-    private int[] labelFrequencies;
     public condition condition;
     public List<Image> imageList;
     private int timeStamp;
-
-    public treeNode(){
-        this.left=null;
-        this.right=null;
-    }
 
     public treeNode(condition cond, int expectedLabel){
         this.condition = cond;
@@ -111,14 +104,13 @@ public class treeNode {
     }
 
 
-    // TODO: Find better way to do this.
+    // Shallow copy of the tree.
     public void replaceLeafByTree (treeNode tree) {
         this.left = tree.left;
         this.right = tree.right;
         this.entropy = tree.entropy;
         this.imageList = tree.imageList;
         this.expectedLabel = tree.expectedLabel;
-        this.labelFrequencies = tree.labelFrequencies;
         this.condition = tree.condition;
         this.timeStamp = tree.timeStamp;
     }

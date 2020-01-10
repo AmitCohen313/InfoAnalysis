@@ -42,6 +42,17 @@ public class Utilities {
         return result;
     }
 
+    public static double calcWeightedInfoGain(double passedEntropy, double failedEntropy, int numOfPassed, int numOfFailed, treeNode father){
+        double relativePassedEntropy = (double)numOfPassed * passedEntropy / father.imageList.size();
+        double relativeFailedEntropy = (double)numOfFailed * failedEntropy / father.imageList.size();
+        double currentInfoGain = father.getEntropy() - relativePassedEntropy - relativeFailedEntropy;
+        if (currentInfoGain <= -1.0) {
+            throw new IllegalArgumentException("info gain is negative!");
+        }
+        double currentWeightedInfoGain = currentInfoGain * father.imageList.size();
+        return currentWeightedInfoGain;
+    }
+
     public static int calcIndices(int x, int y){
         return 28*y+x;
     }
@@ -117,34 +128,24 @@ public class Utilities {
         String[] node = nodeString.split("!");
         condition cond = null;
         if (node[0].equals("C")) {
-//            switch (node[1]) {
-//                case "1":
-//                    cond = V1_condition.fromString(Arrays.copyOfRange(node, 2, node.length));
-//                    break;
-//                case "4":
-//                    cond = V4_condition.fromString(Arrays.copyOfRange(node, 2, node.length));
-//                    break;
-//                case "9":
-//                    cond = V9_Condition.fromString(Arrays.copyOfRange(node, 2, node.length));
-//                    break;
-//                case "11":
-//                    cond = V11_Condition.fromString(Arrays.copyOfRange(node, 2, node.length));
-//                    break;
-//            }
-            dictionary.get(node[1]);
+            switch (node[1]) {
+                case "1":
+                    cond = V1_condition.fromString(Arrays.copyOfRange(node, 2, node.length));
+                    break;
+                case "2":
+                    cond = V2_condition.fromString(Arrays.copyOfRange(node, 2, node.length));
+                    break;
+                case "3":
+                    cond = V3_condition.fromString(Arrays.copyOfRange(node, 2, node.length));
+                    break;
+                case "4":
+                    cond = V4_condition.fromString(Arrays.copyOfRange(node, 2, node.length));
+                    break;
+            }
         }
         int label = Integer.parseInt(node[node.length-1]);
         return new treeNode(cond,label);
     }
-
-    private static HashMap<String,Object> dictionary = new HashMap<String,Object>(){
-        {
-            put("1",V1_condition.class);
-            put("4",V4_condition.class);
-            put("9",V9_Condition.class);
-            put("11",V11_Condition.class);
-        }
-    };
 
     public static String readLineByLine(String filePath)
     {
@@ -158,6 +159,18 @@ public class Utilities {
             e.printStackTrace();
         }
         return contentBuilder.toString();
+    }
+
+    public static int size(treeNode node)
+    {
+        if (node == null)
+            return 0;
+        else
+            return(size(node.getLeft()) + 1 + size(node.getRight()));
+    }
+
+    public static boolean powerOf2(int number){
+        return (number > 0) && ((number & (number - 1)) == 0);
     }
 
 }

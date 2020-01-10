@@ -1,31 +1,39 @@
-
-import java.util.ArrayList;
-
 public class V3_condition implements condition {
-    private int X;
-    private int Y;
     private int threshold;
+    private int diagonalLevel;
+    private final int condVer = 3;
 
-
-    public V3_condition(int x, int y, int threshold) {
-        this.X = x;
-        this.Y = y;
-        this.threshold = threshold;
-    }
-
+    @Override
     public boolean applyCondition(Image img) {
-        return calcRec(img,X,Y)>threshold;
-
-    }
-
-    private double calcRec(Image img, int x, int y) {
-        double sum = 0.0;
-        for (int i = 0; i <= x ; i++){
-            for(int j = 0; j <= y; j++) {
-                sum += img.getPixelAt(i,j);
-            }
+        int sum = 0;
+        int i;
+        int j;
+        if (diagonalLevel<0){
+            i = -1 * diagonalLevel;
+            j = 0;
+        } else {
+            i = 0;
+            j = diagonalLevel;
         }
-        return sum / ((x+1)*(y+1));
+        while (i<= 27 && j<= 27){
+            sum = sum + img.getPixelAt(i,j);
+            i++;
+            j++;
+        }
+
+        return (sum/28-Math.abs(diagonalLevel)) > threshold;
     }
 
+    public V3_condition(int threshold, int diagonalLevel) {
+        this.threshold = threshold;
+        this.diagonalLevel = diagonalLevel;
+    }
+
+    public String toString(){
+        return condVer+"!"+threshold+"!"+diagonalLevel;
+    }
+
+    public static condition fromString(String[] cond){
+        return new V3_condition(Integer.parseInt(cond[0]),Integer.parseInt(cond[1]));
+    }
 }
