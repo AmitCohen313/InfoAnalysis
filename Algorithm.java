@@ -1,32 +1,30 @@
 import java.util.*;
 import java.util.concurrent.*;
-import java.time.format.DateTimeFormatter;
-import java.time.LocalDateTime;
 
 public class Algorithm {
     public static void main(String[] args) {
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM_dd_HH_mm_ss");
-        LocalDateTime now = LocalDateTime.now();
-        int conditionVer = 2;
-        String trainSetPath = "deskewed_mnist_train.csv";
-        String testSetPath = "deskewed_mnist_test.csv";
-
-        learn(13, 40, conditionVer, "tree.txt", trainSetPath);
-        predict("tree.txt", testSetPath);
+        if (args[0].equals("learntree")) {
+            int conditionVer = Integer.parseInt(args[1]);
+            int P = Integer.parseInt(args[2]);
+            int L = Integer.parseInt(args[3]);
+            String trainingset_filename = args[4];
+            String outputtree_filename = args[5];
+            learn(conditionVer,P,L,trainingset_filename,outputtree_filename);
+        } else if (args[0].equals("predict")) {
+            String tree_filename = args[1];
+            String testset_filename = args[2];
+            predict(tree_filename,testset_filename);
+        }
         ////////////////////////////////////////////////////
     }
 
 
-    public static void learn(int L, int P, int conditionVer, String outputFileName, String trainSetPath) {
-        long now = System.currentTimeMillis();
-
+    public static void learn(int conditionVer, int P, int L, String trainSetPath, String outputFileName) {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
 
         ////////////// Image reading //////////////////////
         ArrayList<condition> conditionList = ConditionFactory.createConditions(conditionVer);
-        System.out.println("There are " + conditionList.size() + " conditions.");
         ArrayList<Image> trainImageList = CSVReader.readImages(trainSetPath);
-        System.out.println("Reading images took " + ((float)(System.currentTimeMillis()-now)/1000) + " s");
         ///////////////////////////////////////////////////
 
         ////////////// Tree creating //////////////////////
@@ -39,17 +37,15 @@ public class Algorithm {
             trimTree(tree,bestTreeSize);
             Utilities.writeTreeToFile(tree,outputFileName);
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException(e);
+            System.out.println("Exception raised while learning");
+            return;
         } finally {
             executorService.shutdown();
         }
         ///////////////////////////////////////////////////
 
-        System.out.println("Learning took " + ((float)((System.currentTimeMillis()-now))/1000) + "s");
-
         System.out.println("num: " + trainImageList.size());
-        System.out.println("error: " + (int)(100-(applyTreeOnDataSet(tree,trainImageList)*100)));
+        System.out.println("error: " + (int)(100-(applyTreeOnDataSet(tree,trainImageList,false)*100)));
         System.out.println("size: " + (Utilities.size(tree)-1)/2);
     }
 
@@ -57,8 +53,7 @@ public class Algorithm {
     public static void predict(String treeFilePath,String testSetPath) {
         treeNode treeTest = Utilities.readTreeFromFile(treeFilePath);
         ArrayList<Image> testSet = CSVReader.readImages(testSetPath);
-        System.out.println("test error: " + applyTreeOnDataSet(treeTest,testSet));
-        // TODO: add print of all the predicted labels.
+        applyTreeOnDataSet(treeTest,testSet,true);
     }
 
 
@@ -74,7 +69,7 @@ public class Algorithm {
     }
 
 
-    // Create a tree with a given size. According to the learnVersion - can either return the best tree size or return the tree itself.
+    // Create a tree with a given size. According to the whether validation set is null or not - can either return the best tree size or return the tree itself.
     private static Object createTree(int numOfIterations, ArrayList<Image> trainingSet, ArrayList<Image> validationSet, ArrayList<condition> conditionList) {
         PriorityQueue<virtualTree> virtualTreePriorityQueue = new PriorityQueue<>(numOfIterations,new virtualTreeComperator());
         int[] trainingFrequencies = countImageFrequencies(trainingSet);
@@ -86,7 +81,7 @@ public class Algorithm {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
 
         double currentBestScore = -1.0;
-        Integer bestTreeSize = -1;
+        int bestTreeSize = -1;
         for (int i = 1; i <= numOfIterations; i++) {
             virtualTree virtualTree = virtualTreePriorityQueue.poll();
             // If the queue is empty, stop the loop.
@@ -110,16 +105,15 @@ public class Algorithm {
                     virtualTreePriorityQueue.add(right);
                 }
             } catch (Exception e) {
-                executorService.shutdown();
-                e.printStackTrace();
+                System.out.println("Exception raised while learning");
+                break;
             }
 
             // Validation set exist means that the method should return tree size.
             if (validationSet != null) {
                 // Check if the current tree is better than the current best tree.
                 if (Utilities.powerOf2(i)) {
-                    System.out.print(i + ".");
-                    double currentScore = applyTreeOnDataSet(treeToReturn, validationSet);
+                    double currentScore = applyTreeOnDataSet(treeToReturn, validationSet,false);
                     if (currentScore > currentBestScore) {
                         bestTreeSize = i;
                         currentBestScore = currentScore;
@@ -155,10 +149,10 @@ public class Algorithm {
 
 
     // Gets a data set and a tree, applies the tree on the data set and returns the success percentage.
-    public static double applyTreeOnDataSet(treeNode tree, ArrayList<Image> dataSet) {
+    public static double applyTreeOnDataSet(treeNode tree, ArrayList<Image> dataSet, boolean shouldPrintLabels) {
         int numOfSuccesses = 0;
         for (Image img: dataSet) {
-            if (applyTreeOnImage(tree,img)) {
+            if (applyTreeOnImage(tree,img,shouldPrintLabels)) {
                 numOfSuccesses++;
             }
         }
@@ -167,7 +161,7 @@ public class Algorithm {
 
 
     // Gets a tree and an image, applies the tree on the image and returns whether the prediction is right or not.
-    public static boolean applyTreeOnImage(treeNode tree, Image img) {
+    public static boolean applyTreeOnImage(treeNode tree, Image img, boolean shouldPrintLabels) {
         while (!tree.isLeaf()) {
             if (tree.getCondition().applyCondition(img)) {
                 if (tree.getRight() != null) {
@@ -178,6 +172,9 @@ public class Algorithm {
                     tree = tree.getLeft();
                 }
             }
+        }
+        if (shouldPrintLabels){
+            System.out.println(tree.getExpectedLabel());
         }
         return tree.getExpectedLabel() == img.getLabel();
     }
@@ -206,7 +203,7 @@ public class Algorithm {
             int[] passedFrequencies = new int[10];
             int[] failedFrequencies = new int[10];
             int listSize = father.imageList.size();
-            for (int i = 0;i<listSize;i++){
+            for (int i = 0; i<listSize; i++){
                 Image img = father.imageList.get(i);
                 if (cond.applyCondition(img)) {
                     passedCond.add(img);

@@ -16,7 +16,7 @@ public class CSVReader {
                 imageList.add(new Image(res.first,res.second,res.third));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Error raised while reading images from " + path);
         }
         return imageList;
     }
@@ -28,10 +28,10 @@ public class CSVReader {
         Integer label = Integer.parseInt((String)st.nextElement());
         int i = 0;
         int j = 0;
+        // Create the integral image using dynamic programming.
         while (st.hasMoreElements()) {
             pixelsArr[Utilities.calcIndices(i,j)] = (Integer.parseInt((String)st.nextElement()));
 
-            // Create the integral array with dynamic programming.
             if (i == 0 && j == 0){
                 integralPixelsArr[Utilities.calcIndices(i,j)] = pixelsArr[Utilities.calcIndices(i,j)];
             } else if (i == 0){
@@ -51,5 +51,4 @@ public class CSVReader {
         }
         return new Utilities.Triplet<>(label,pixelsArr,integralPixelsArr);
     }
-
 }

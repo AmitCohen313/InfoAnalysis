@@ -46,9 +46,6 @@ public class Utilities {
         double relativePassedEntropy = (double)numOfPassed * passedEntropy / father.imageList.size();
         double relativeFailedEntropy = (double)numOfFailed * failedEntropy / father.imageList.size();
         double currentInfoGain = father.getEntropy() - relativePassedEntropy - relativeFailedEntropy;
-        if (currentInfoGain <= -1.0) {
-            throw new IllegalArgumentException("info gain is negative!");
-        }
         double currentWeightedInfoGain = currentInfoGain * father.imageList.size();
         return currentWeightedInfoGain;
     }
@@ -81,8 +78,7 @@ public class Utilities {
         try (PrintWriter out = new PrintWriter(filepath)) {
             out.print(tree.toString());
         } catch (Exception e) {
-            System.out.println("IOException is caught");
-            e.printStackTrace();
+            System.out.println("Error raised while writing tree to " + filepath);
         }
     }
 
@@ -156,7 +152,7 @@ public class Utilities {
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            System.out.println("Error raised while reading tree from " + filePath);
         }
         return contentBuilder.toString();
     }
